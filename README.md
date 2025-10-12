@@ -60,7 +60,7 @@ A Kotlin-based Android application that enables peer‑to‑peer (P2P) device di
 - Settings (timeouts, discovery intervals)
 - Logs / Diagnostics (optional)
 
-> ![Peer List](screenshots/Screenshot_20251012_102817_WIFI Direct Hotspot.jpg
+![Peer List](screenshots/peer_list.jpg)
 
 ---
 
