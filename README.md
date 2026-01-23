@@ -1,212 +1,122 @@
-# Wi‑Fi Direct Hotspot Android App
+# Wi-Fi Direct Hotspot Android App
 
-A Kotlin-based Android application that enables peer‑to‑peer (P2P) device discovery, connection, and data exchange using Wi‑Fi Direct (a.k.a. Wi‑Fi P2P). This app demonstrates how to create a host (group owner), let clients join, and optionally simulate a "hotspot-like" experience without requiring traditional AP credentials.
+![Kotlin](https://img.shields.io/badge/Kotlin-1.9+-7F52FF?style=flat&logo=kotlin&logoColor=white)
+![Android SDK](https://img.shields.io/badge/Min%20SDK-24-3DDC84?style=flat&logo=android&logoColor=white)
+![License](https://img.shields.io/badge/License-GPLv3-blue.svg)
 
-> Wi‑Fi Direct allows devices to connect directly without an intermediate access point. This project can be a foundation for offline collaboration, file sharing, multiplayer gaming, device provisioning, IoT commissioning, classroom tools, or emergency communication scenarios.
+A robust, Kotlin-based Android application demonstrating peer-to-peer (P2P) device discovery, connection, and data exchange using the **Wi-Fi Direct** (Wi-Fi P2P) protocol. This project serves as a comprehensive reference implementation for creating ad-hoc networks, enabling device-to-device communication without requiring an intermediate access point or internet connection.
 
----
-
-## ✨ Features (Planned / Implemented)
-
-- Device discovery & peer list updates
-- Group creation (Group Owner) & joining
-- Connection status callbacks
-- Service discovery (DNS-SD / Bonjour style) (optional extension)
-- Automatic retry or graceful teardown
-- Foreground service (if long-running networking)
-- Permissions + runtime handling (Android 13+ changes)
-- Optional encryption layer (future enhancement)
-- Dark mode compliant UI (if implemented with Material3)
+> **Key Concept:** Wi-Fi Direct allows various devices to connect directly with each other. This enables key scenarios like offline file sharing, multiplayer gaming, collaborative tools, and IoT provisioning.
 
 ---
 
-## 🏗 Architecture Overview
+## ✨ Features
+
+### Core Capabilities
+*   **Device Discovery**: Efficiently scan and list nearby Wi-Fi Direct enabled devices.
+*   **Group Management**: Act as a Group Owner (GO) or join existing groups as a client.
+*   **Connection Handling**: Robust management of connection states with real-time status updates.
+*   **Socket Communication**: Establishes server/client sockets for reliable data transfer after group formation.
+*   **Permission Handling**: proper implementation of runtime permissions, including Android 13+ strict requirements (`NEARBY_WIFI_DEVICES`).
+
+### Planned Enhancements
+*   [ ] Service Discovery (DNS-SD / Bonjour)
+*   [ ] Secure Communication Layer (TLS/Encryption)
+*   [ ] Foreground Service support for long-running connections
+*   [ ] Modern Material 3 Dark Mode UI
+
+---
+
+## 🏗 Architecture
+
+The functionality is layered to ensure separation of concerns and maintainability:
 
 | Layer | Responsibility |
 |-------|----------------|
-| UI (Activities/Fragments/Compose) | User interactions, discovery controls, connection status |
-| Wi‑Fi Direct Controller | Wraps `WifiP2pManager` calls (discover peers, connect, create group, remove group) |
-| Broadcast Receiver | Listens for Wi‑Fi P2P state, peers, connection, device status changes |
-| Data Channel (Sockets) | After group formation, opens server/client sockets for message/file transfer |
-| Repository / Use Cases (Optional) | Abstracts networking + persistence |
-| Utilities | Permission helpers, logging, serialization, file IO |
-
----
-
-## 🔍 How Wi‑Fi Direct Works (In This App)
-
-1. Initialize `WifiP2pManager` + `Channel`.
-2. Register a `BroadcastReceiver` for:
-   - `WIFI_P2P_STATE_CHANGED_ACTION`
-   - `WIFI_P2P_PEERS_CHANGED_ACTION`
-   - `WIFI_P2P_CONNECTION_CHANGED_ACTION`
-   - `WIFI_P2P_THIS_DEVICE_CHANGED_ACTION`
-3. Start peer discovery.
-4. Show list of peers → user taps to connect.
-5. Group is formed (one device becomes Group Owner).
-6. Obtain group info & owner IP.
-7. Open sockets:
-   - Group Owner: server socket
-   - Clients: connect to owner IP
-8. Allow disconnect / teardown.
-
----
-
-## 📱 Screens (Describe / Add Images Later)
-
-- Peer Discovery Screen
-- Connection Status Screen
-- Data Transfer / Chat / File Panel
-- Settings (timeouts, discovery intervals)
-- Logs / Diagnostics (optional)
-
-![Peer List](screenshots/peer_list.jpg)
-
----
-
-## 🧪 Testing Strategy
-
-- Unit: Controller logic (mock `WifiP2pManager`)
-- Instrumented: Permission flows, broadcast receiver reactions
-- Manual Scenarios:
-  - Device A (GO) + Device B (client)
-  - Disconnect + Reconnect
-  - Airplane mode toggle
-  - Background/foreground transitions
+| **UI** | Activities/Fragments handling user interaction and displaying connection state. |
+| **Controller** | Manages `WifiP2pManager` interactions (Discovery, Connect, Teardown). |
+| **BroadcastReceiver** | Listens for system intents (`PEERS_CHANGED`, `CONNECTION_CHANGED`). |
+| **Data Layer** | Socket management for actual payload transfer between devices. |
 
 ---
 
 ## 🚀 Getting Started
 
 ### Prerequisites
+*   **Android Studio**: Giraffe or newer recommended.
+*   **JDK**: Compatible with Kotlin 1.9+.
+*   **Physical Devices**: Two Android devices are required for testing (Emulators do not support full Wi-Fi P2P functionality).
 
-- Android Studio (Giraffe+)
-- Kotlin 1.9+
-- Min SDK (recommend 24 or 26+) – Wi‑Fi Direct requires API 14+, but modern features + permission model justify a higher min
-- Target SDK 34 (adjust as needed)
+### Installation
 
-### Clone
+1.  **Clone the repository**
+    ```bash
+    git clone https://github.com/praveenkarunarathne/WIFI-Direct-Hotspot-Android-App.git
+    cd WIFI-Direct-Hotspot-Android-App
+    ```
 
-```bash
-git clone https://github.com/praveenkarunarathne/WIFI-Direct-Hotspot-Android-App.git
-cd WIFI-Direct-Hotspot-Android-App
-```
+2.  **Open in Android Studio**
+    *   Select `File > Open...` and choose the project directory.
 
-### Open & Build
+3.  **Build and Run**
+    *   Sync Gradle files.
+    *   Deploy to two physical Android devices.
 
-1. Open in Android Studio.
-2. Sync Gradle.
-3. Build + Run on two physical devices (emulators often lack full Wi‑Fi P2P support).
+---
+
+## 📱 Screenshots
+
+<p align="center">
+  <img src="screenshots/peer_list.jpg" alt="Peer Discovery Screen" width="300" />
+  <br>
+  <em>Peer Discovery Interface</em>
+</p>
 
 ---
 
 ## 🔐 Permissions
 
-Add (or confirm) in `AndroidManifest.xml`:
+This app adheres to Android's strict privacy and security guidelines.
 
-```xml
-<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-<uses-permission android:name="android.permission.NEARBY_WIFI_DEVICES"
-                 android:usesPermissionFlags="neverForLocation" />
-<uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
-<uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
-<uses-permission android:name="android.permission.INTERNET" />
-```
-
-Runtime (Android 12+ / 13+):
-- Request `ACCESS_FINE_LOCATION` (needed for peer discovery)
-- Request `NEARBY_WIFI_DEVICES` (Android 13 / API 33+)
-
----
-
-## 🧩 Key Classes (Expected)
-
-| Component | Purpose |
-|-----------|---------|
-| `WifiP2pBroadcastReceiver` | Handles system Wi‑Fi P2P intents |
-| `WifiP2pHelper` / `Manager` | Encapsulates `WifiP2pManager` operations |
-
----
-
-## 🛠 Configuration Options (Possible Environment Flags)
-
-| Option | Description | Default |
-|--------|-------------|---------|
-| Discovery interval | Periodic rediscovery strategy | Manual |
-
----
-
-## 📡 Distinguishing Wi‑Fi Direct vs Traditional Hotspot
-
-| Feature | Wi‑Fi Direct | Classic Hotspot |
-|---------|--------------|-----------------|
-| Requires AP credentials | No | Yes |
-| Power usage | Moderate | Higher |
-| Internet sharing | Not by default | Usually yes |
-| Peer limit | Typically 8 | Varies |
-| Setup speed | Fast | Medium |
+| Permission | Description |
+|------------|-------------|
+| `ACCESS_FINE_LOCATION` | Required for peer discovery on older Android versions. |
+| `NEARBY_WIFI_DEVICES` | **Android 13+**: Required for finding nearby devices without location. |
+| `ACCESS_WIFI_STATE` | To check Wi-Fi status. |
+| `CHANGE_WIFI_STATE` | To initialize P2P connections. |
+| `INTERNET` | Standard networking permission (often implied, but good practice). |
 
 ---
 
 ## 🧯 Troubleshooting
 
-| Issue | Cause | Fix |
-|-------|-------|-----|
-| No peers found | Location off | Enable device location |
-| Connect loops | Stale group | Remove group then retry |
-| Socket refused | Wrong IP | Use `groupOwnerAddress.hostAddress` |
-| Discovery stops | OS throttling | Re-initiate manually |
-| Android 13 permission error | Missing NEARBY_WIFI_DEVICES | Request runtime permission |
-
----
-
-## 🗺 Roadmap (Adjust)
-
-- [ ] UI polish (Material 3)
-- [ ] Encrypted channel (TLS over sockets)
-- [ ] File transfer progress
-- [ ] Service discovery advertisement
-- [ ] QR-based pairing metadata
-- [ ] Logging dashboard
-- [ ] Battery impact metrics
-- [ ] Multicast / group messaging abstraction
-- [ ] Integration tests on multiple OEM devices
+| Issue | Potential Solution |
+|-------|--------------------|
+| **No peers found** | Ensure "Location" and "Wi-Fi" are both enabled on the device. |
+| **Connection Stuck** | Try removing the group from Settings > Wi-Fi > Direct or restart Wi-Fi. |
+| **Socket Failure** | Verify the Client is connecting to the correct Group Owner IP Address. |
 
 ---
 
 ## 🤝 Contributing
 
-1. Fork
-2. Create feature branch: `git checkout -b feature/my-feature`
-3. Commit: `git commit -m "Add my feature"`
-4. Push: `git push origin feature/my-feature`
-5. Open a Pull Request with context & screenshots
+Contributions are welcome!
+
+1.  **Fork** the project.
+2.  Create your Feature Branch (`git checkout -b feature/AmazingFeature`).
+3.  **Commit** your changes (`git commit -m 'Add some AmazingFeature'`).
+4.  **Push** to the Branch (`git push origin feature/AmazingFeature`).
+5.  Open a **Pull Request**.
 
 ---
 
-## 🙋 FAQ
+## 📄 License
 
-| Question | Answer |
-|----------|--------|
-| Why location permission? | Android ties Wi‑Fi scan data to location privacy. |
-| Works on emulator? | Generally no; use real hardware. |
-| Needs Internet? | No, unless app also fetches remote data. |
-| Can I force Group Owner? | Use `connect()` with `groupOwnerIntent = 15` (not guaranteed). |
-
----
-
-## 📑 References
-
-- [Wi‑Fi Direct Overview (Android Docs)](https://developer.android.com/guide/topics/connectivity/wifip2p)
-- [WifiP2pManager API](https://developer.android.com/reference/android/net/wifi/p2p/WifiP2pManager)
-- [Nearby Wi‑Fi Devices Permission](https://developer.android.com/about/versions/13/behavior-changes-13#nearby-wifi-devices)
+This project is licensed under the **GNU General Public License v3.0**. See the [LICENSE](LICENSE) file for details.
 
 ---
 
 ## 🙌 Acknowledgements
 
-- Android Open Source Project examples
-- Community tutorials on Wi‑Fi P2P
-- Contributors & testers
-
----
+*   Android Open Source Project (AOSP) documentation.
+*   The open-source community for continuous exploration of Wi-Fi P2P limitations and workarounds.
